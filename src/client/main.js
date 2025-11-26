@@ -2,7 +2,7 @@
 /* Attribution: Assignment 5 codebase */
 "use strict";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import styled from "styled-components";
 import { BrowserRouter, NavLink, Route, Routes } from "react-router";
@@ -104,6 +104,53 @@ const MyApp = () => {
     // Reset user state
     setState(defaultUser);
   };
+
+  // Auto-login for development
+  useEffect(() => {
+    const autoLogin = async () => {
+      // Only run in development mode with auto-login enabled
+      const isDev = true;
+      const autoLoginEnabled = true;
+
+      if (!isDev || !autoLoginEnabled) {
+        return;
+      }
+
+      // Don't auto-login if user is already logged in
+      if (loggedIn()) {
+        return;
+      }
+
+      try {
+        console.log("Auto-logging in as test user (development mode)...");
+
+        // Login with test credentials
+        const response = await fetch("/v1/session", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: "primaryuser",
+            password: "!12345abcdeF",
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          await logIn(data.username);
+          console.log("Auto-login successful!");
+        } else {
+          console.warn("Auto-login failed - test user may not exist yet");
+        }
+      } catch (err) {
+        console.warn("Auto-login error:", err.message);
+      }
+    };
+
+    autoLogin();
+  }, []);
 
   return (
     <BrowserRouter>
