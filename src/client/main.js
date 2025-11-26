@@ -13,6 +13,7 @@ import { Login } from "./components/login.js";
 import { Logout } from "./components/logout.js";
 import { Register } from "./components/register.js";
 import { Profile } from "./components/profile.js";
+import { Edit } from "./components/edit.js";
 import { Start } from "./components/start.js";
 import { Results } from "./components/results.js";
 import { Game } from "./components/game.js";
@@ -108,7 +109,6 @@ const MyApp = () => {
   // Auto-login for development
   useEffect(() => {
     const autoLogin = async () => {
-      // Only run in development mode with auto-login enabled
       const isDev = true;
       const autoLoginEnabled = true;
 
@@ -124,7 +124,6 @@ const MyApp = () => {
       try {
         console.log("Auto-logging in as test user (development mode)...");
 
-        // Login with test credentials
         const response = await fetch("/v1/session", {
           method: "POST",
           credentials: "include",
@@ -169,6 +168,14 @@ const MyApp = () => {
           <Route
             path="/profile/:username"
             element={<Profile currentUser={state.username} />}
+          />
+          <Route
+            path="/edit"
+            element={
+              <ReqUser user={state}>
+                <Edit user={state} />
+              </ReqUser>
+            }
           />
           <Route
             path="/start"

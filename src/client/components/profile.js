@@ -66,9 +66,6 @@ const ProfileBlock = (props) => {
 const EditLinkBase = styled.div`
   grid-area: sb;
   display: none;
-  & > a {
-    cursor: not-allowed;
-  }
   @media (min-width: 500px) {
     display: inherit;
   }
