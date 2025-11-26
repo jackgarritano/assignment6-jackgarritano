@@ -52,7 +52,7 @@ const PileFrame = styled.div`
 export const Pile = ({
   pileType,
   cards = [],
-  spacing = 8,
+  spacing = 12,
   horizontal = false,
   up,
   onClick,
