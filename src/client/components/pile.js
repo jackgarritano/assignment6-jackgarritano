@@ -22,6 +22,12 @@ export const Card = ({ card, top, left, onClick, pile, isSelected }) => {
     boxShadow: isSelected ? "0 0 10px yellow" : "none",
   };
   const id = `${card.suit}:${card.value}`;
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    onClick(e);
+  };
+
   return (
     <CardImg
       id={id}
@@ -29,7 +35,7 @@ export const Card = ({ card, top, left, onClick, pile, isSelected }) => {
       data-suit={card.suit}
       data-value={card.value}
       data-up={card.up}
-      onClick={onClick}
+      onClick={handleClick}
       style={style}
       src={source}
     />

@@ -9,6 +9,7 @@ import {
   filterGameForProfile,
   filterMoveForResults,
   validateMove,
+  isComplete,
 } from "../../solitare.js";
 
 export default (app) => {
@@ -100,10 +101,10 @@ export default (app) => {
             state.stack3.length +
             state.stack4.length);
         // Do we need to grab the moves
-        if (req.query.moves === "") {
-          const moves = await app.models.Move.find({ game: req.params.id });
+        // if (req.query.moves === "") {
+          const moves = await app.models.Move.find({ game: req.params.id }).populate('user', 'username');
           state.moves = moves.map((move) => filterMoveForResults(move));
-        }
+        // }
         res.status(200).send(Object.assign({}, results, state));
       }
     } catch (err) {
@@ -211,11 +212,19 @@ export default (app) => {
         const move = new app.models.Move({
           user: req.session.user._id,
           game: game._id,
-          cards: data.cards,
+          cards: validationResult.movedCards ? validationResult.movedCards : data.cards,
           src: data.src,
           dst: data.dst,
           date: Date.now(),
         });
+
+        const {complete, victory} = isComplete(state);
+        if (complete) {
+          game.active = false;
+        }
+        if (victory) {
+          game.won = false;
+        }
 
         await game.save();
         await move.save();

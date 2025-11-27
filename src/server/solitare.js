@@ -78,9 +78,23 @@ export const filterGameForProfile = (game) => ({
   winner: game.winner,
 });
 
-export const filterMoveForResults = (move) => ({
-  ...move,
-});
+export const filterMoveForResults = (move) => {
+  const cardDescriptions = move.cards
+    .map((card) => `${card.value} of ${card.suit}`)
+    .join(", ");
+
+  const moveDescription =
+    move.cards.length > 0
+      ? `${cardDescriptions} from ${move.src} to ${move.dst}`
+      : "Reset draw pile";
+
+  return {
+    id: move._id,
+    date: Date.parse(move.date),
+    player: move.user.username,
+    move: moveDescription,
+  };
+};
 
 export const validateMove = (currentState, move, drawCount = 1) => {
   if (!currentState || !move) {
@@ -310,14 +324,30 @@ export const validateMove = (currentState, move, drawCount = 1) => {
     }
 
     const numToMove = Math.min(drawCount, drawPile.length);
+    const movedCards = [];
     for (let i = 0; i < numToMove; i++) {
       const card = drawPile.pop();
       card.up = true;
       discardPile.push(card);
+      movedCards.push({ suit: card.suit, value: card.value });
     }
 
-    return { valid: true, newState };
+    return { valid: true, newState, movedCards };
   }
 
   return { valid: false, error: "Invalid move type" };
+};
+
+// Only checks for won
+export const isComplete = (gameState) => {
+  if (
+    gameState.stack1.length === 13 &&
+    gameState.stack2.length === 13 &&
+    gameState.stack3.length === 13 &&
+    gameState.stack4.length === 13
+  ) {
+    return { complete: true, victory: true };
+  }
+
+  return { complete: false, victory: false };
 };
