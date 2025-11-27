@@ -8,14 +8,21 @@ import styled from "styled-components";
 
 import { ErrorMessage, InfoBlock, InfoData, InfoLabels } from "./shared.js";
 
-const Move = ({ move, index }) => {
+const Move = ({ move, index, gameId }) => {
   const duration = Date.now() - move.date;
+
   return (
     <tr>
-      <th>{move.id ? move.id : index + 1}</th>
+      <th>
+        <NavLink to={`/game/${gameId}/move/${move.id}`}>
+          {move.id ? move.id : index + 1}
+        </NavLink>
+      </th>
       <th>{duration} seconds</th>
       <th>
-        <NavLink to={`/profile/${move.player}`}>{move.player}</NavLink>
+        <NavLink to={`/profile/${move.player}`}>
+          {move.player}
+        </NavLink>
       </th>
       <th>{move.move}</th>
     </tr>
@@ -36,9 +43,9 @@ const MovesListTable = styled.table`
   }
 `;
 
-const MovesList = ({ moves }) => {
+const MovesList = ({ moves, gameId }) => {
   let moveElements = moves.map((move, index) => (
-    <Move key={index} move={move} index={index} />
+    <Move key={index} move={move} index={index} gameId={gameId} />
   ));
   return (
     <MovesListTable>
@@ -114,7 +121,7 @@ export const Results = () => {
       <ErrorMessage msg={error} hide={true} />
       <h4>Game Detail</h4>
       <GameDetail {...game} />
-      <MovesList moves={game.moves} />
+      <MovesList moves={game.moves} gameId={id} />
     </ResultsBase>
   );
 };

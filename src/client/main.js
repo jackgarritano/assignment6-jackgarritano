@@ -186,6 +186,7 @@ const MyApp = () => {
             }
           />
           <Route path="/game/:id" element={<Game user={state} />} />
+          <Route path="/game/:id/move/:moveId" element={<Game readOnly={true} />} />
           <Route path="/results/:id" element={<Results user={state} />} />
         </Routes>
       </GridBase>

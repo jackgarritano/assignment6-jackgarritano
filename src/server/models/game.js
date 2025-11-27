@@ -34,6 +34,7 @@ const Game = new Schema({
   start: { type: Date },
   end: { type: Date },
   state: { type: KlondykeGameState },
+  initialState: { type: KlondykeGameState },
   game: {
     type: String,
     required: true,

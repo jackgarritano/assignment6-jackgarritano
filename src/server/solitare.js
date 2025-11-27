@@ -106,7 +106,9 @@ export const validateMove = (currentState, move, drawCount = 1) => {
     return { valid: false, error: "Invalid move data" };
   }
 
-  const newState = structuredClone(currentState.toJSON());
+  const newState = structuredClone(
+    currentState.toJSON ? currentState.toJSON() : currentState
+  );
 
   const getCardValue = (card) => {
     const val = card.value.toString().toLowerCase();

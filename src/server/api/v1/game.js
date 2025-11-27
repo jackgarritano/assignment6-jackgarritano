@@ -58,7 +58,9 @@ export default (app) => {
       }
       console.log(newGame);
       // Generate a new initial game state
-      newGame.state = initialState();
+      const startState = initialState();
+      newGame.state = startState;
+      newGame.initialState = startState;
       let game = new app.models.Game(newGame);
       try {
         await game.save();
@@ -110,6 +112,58 @@ export default (app) => {
     } catch (err) {
       console.log(`Game.get failure: ${err}`);
       res.status(404).send({ error: `unknown game: ${req.params.id}` });
+    }
+  });
+
+  /**
+   * Fetch game state at a specific move
+   *
+   * @param {req.params.id} Id of game
+   * @param {req.params.moveId} Id of move to reconstruct state up to
+   * @return {200} Game state after the specified move
+   */
+  app.get("/v1/game/:id/move/:moveId", async (req, res) => {
+    try {
+      let game = await app.models.Game.findById(req.params.id);
+      if (!game) {
+        return res.status(404).send({ error: `unknown game: ${req.params.id}` });
+      }
+
+      const allMoves = await app.models.Move.find({ game: req.params.id })
+                                            .sort({ date: 1 })
+                                            .populate('user', 'username');
+
+      const targetMoveIndex = allMoves.findIndex(
+        move => move._id.toString() === req.params.moveId
+      );
+
+      if (targetMoveIndex === -1) {
+        return res.status(404).send({ error: `unknown move: ${req.params.moveId}` });
+      }
+
+      let state = game.initialState.toJSON();
+
+      const movesToReplay = allMoves.slice(0, targetMoveIndex + 1);
+      for (const move of movesToReplay) {
+        const moveRequest = {
+          cards: move.cards,
+          src: move.src,
+          dst: move.dst,
+        };
+        const result = validateMove(state, moveRequest, game.drawCount);
+        if (result.valid) {
+          state = result.newState;
+        } else {
+          console.error(`Error replaying move ${move._id}: ${result.error}`);
+        }
+      }
+
+      let results = filterGameForProfile(game);
+
+      res.status(200).send(Object.assign({}, results, state));
+    } catch (err) {
+      console.log(`Get old move failure: ${err}`);
+      res.status(500).send({ error: `server error` });
     }
   });
 

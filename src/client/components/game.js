@@ -26,8 +26,8 @@ const GameBase = styled.div`
   grid-column: sb / main;
 `;
 
-export const Game = () => {
-  const { id } = useParams();
+export const Game = ({ readOnly = false }) => {
+  const { id, moveId } = useParams();
   let [state, setState] = useState({
     pile1: [],
     pile2: [],
@@ -53,7 +53,10 @@ export const Game = () => {
 
   useEffect(() => {
     const getGameState = async () => {
-      const response = await fetch(`/v1/game/${id}`);
+      const endpoint = moveId
+        ? `/v1/game/${id}/move/${moveId}`
+        : `/v1/game/${id}`;
+      const response = await fetch(endpoint);
       const data = await response.json();
       setState({
         pile1: data.pile1,
@@ -72,7 +75,7 @@ export const Game = () => {
       });
     };
     getGameState().then();
-  }, [id]);
+  }, [id, moveId]);
 
   const handleSelection = (pile, suit, value) => {
     if (!suit || !value) return; // Clicked on empty pile
@@ -199,6 +202,8 @@ export const Game = () => {
     }
   };
 
+  const pileOnClick = readOnly ? () => {} : onClick;
+
   return (
     <GameBase>
       <CardRow>
@@ -206,28 +211,28 @@ export const Game = () => {
           pileType="stack1"
           cards={state.stack1}
           spacing={0}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="stack2"
           cards={state.stack2}
           spacing={0}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="stack3"
           cards={state.stack3}
           spacing={0}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="stack4"
           cards={state.stack4}
           spacing={0}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <CardRowGap />
@@ -235,14 +240,14 @@ export const Game = () => {
           pileType="draw"
           cards={state.draw}
           spacing={0}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="discard"
           cards={state.discard}
           spacing={0}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
       </CardRow>
@@ -250,43 +255,43 @@ export const Game = () => {
         <Pile
           pileType="pile1"
           cards={state.pile1}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="pile2"
           cards={state.pile2}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="pile3"
           cards={state.pile3}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="pile4"
           cards={state.pile4}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="pile5"
           cards={state.pile5}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="pile6"
           cards={state.pile6}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
         <Pile
           pileType="pile7"
           cards={state.pile7}
-          onClick={onClick}
+          onClick={pileOnClick}
           selection={selection}
         />
       </CardRow>
