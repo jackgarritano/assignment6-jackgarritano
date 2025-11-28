@@ -26,6 +26,21 @@ const GameBase = styled.div`
   grid-column: sb / main;
 `;
 
+const AutoCompleteButton = styled.button`
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 1em;
+  background: ${props => props.disabled ? '#cccccc' : (props.$active ? '#ff6b6b' : '#6495ed')};
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+
+  &:hover {
+    background: ${props => props.disabled ? '#cccccc' : (props.$active ? '#ff5252' : '#4169e1')};
+  }
+`;
+
 export const Game = ({ readOnly = false }) => {
   const { id, moveId } = useParams();
   let [state, setState] = useState({
@@ -48,6 +63,8 @@ export const Game = ({ readOnly = false }) => {
     cardIndex: null,
     cards: [],
   });
+  let [autoCompleting, setAutoCompleting] = useState(false);
+  let [hasValidMoves, setHasValidMoves] = useState(true);
   // let [target, setTarget] = useState(undefined);
   // let [startDrag, setStartDrag] = useState({ x: 0, y: 0 });
 
@@ -73,9 +90,56 @@ export const Game = ({ readOnly = false }) => {
         draw: data.draw,
         discard: data.discard,
       });
+
+      if (!readOnly && !moveId) {
+        const validMovesResponse = await fetch(`/v1/game/${id}/valid-move`);
+        const validMoves = await validMovesResponse.json();
+        setHasValidMoves(validMoves.length > 0);
+      }
     };
     getGameState().then();
-  }, [id, moveId]);
+  }, [id, moveId, readOnly]);
+
+  useEffect(() => {
+    let intervalId;
+
+    const autoComplete = async () => {
+      try {
+        const response = await fetch(`/v1/game/${id}/valid-move`);
+        const validMoves = await response.json();
+
+        if (validMoves.length === 0) {
+          setHasValidMoves(false);
+          setAutoCompleting(false);
+          return;
+        }
+
+        setHasValidMoves(true);
+
+        if (autoCompleting) {
+          const move = validMoves[0];
+          await makeMove(move);
+        }
+      } catch (error) {
+        console.error("Error fetching valid moves:", error);
+        setAutoCompleting(false);
+      }
+    };
+
+    if (autoCompleting && !readOnly && !moveId) {
+      intervalId = setInterval(autoComplete, 500);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [autoCompleting, id, readOnly, moveId]);
+
+  const toggleAutoComplete = () => {
+    setAutoCompleting(!autoCompleting);
+  };
 
   const handleSelection = (pile, suit, value) => {
     if (!suit || !value) return; // Clicked on empty pile
@@ -132,6 +196,10 @@ export const Game = ({ readOnly = false }) => {
         });
 
         setSelection({ pile: null, cardIndex: null, cards: [] });
+        const validMovesResponse = await fetch(`/v1/game/${id}/valid-move`);
+        const validMoves = await validMovesResponse.json();
+        setHasValidMoves(validMoves.length > 0);
+      
       } else {
         console.log(`Invalid move: ${data.error}`);
 
@@ -206,6 +274,17 @@ export const Game = ({ readOnly = false }) => {
 
   return (
     <GameBase>
+      {!readOnly && !moveId && (
+        <div style={{ textAlign: 'center' }}>
+          <AutoCompleteButton
+            onClick={toggleAutoComplete}
+            disabled={!hasValidMoves}
+            $active={autoCompleting}
+          >
+            {autoCompleting ? 'Stop Auto-Complete' : 'Auto-Complete'}
+          </AutoCompleteButton>
+        </div>
+      )}
       <CardRow>
         <Pile
           pileType="stack1"

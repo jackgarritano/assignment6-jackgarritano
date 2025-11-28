@@ -104,8 +104,10 @@ export default (app) => {
             state.stack4.length);
         // Do we need to grab the moves
         // if (req.query.moves === "") {
-          const moves = await app.models.Move.find({ game: req.params.id }).populate('user', 'username');
-          state.moves = moves.map((move) => filterMoveForResults(move));
+        const moves = await app.models.Move.find({
+          game: req.params.id,
+        }).populate("user", "username");
+        state.moves = moves.map((move) => filterMoveForResults(move));
         // }
         res.status(200).send(Object.assign({}, results, state));
       }
@@ -126,19 +128,23 @@ export default (app) => {
     try {
       let game = await app.models.Game.findById(req.params.id);
       if (!game) {
-        return res.status(404).send({ error: `unknown game: ${req.params.id}` });
+        return res
+          .status(404)
+          .send({ error: `unknown game: ${req.params.id}` });
       }
 
       const allMoves = await app.models.Move.find({ game: req.params.id })
-                                            .sort({ date: 1 })
-                                            .populate('user', 'username');
+        .sort({ date: 1 })
+        .populate("user", "username");
 
       const targetMoveIndex = allMoves.findIndex(
-        move => move._id.toString() === req.params.moveId
+        (move) => move._id.toString() === req.params.moveId
       );
 
       if (targetMoveIndex === -1) {
-        return res.status(404).send({ error: `unknown move: ${req.params.moveId}` });
+        return res
+          .status(404)
+          .send({ error: `unknown move: ${req.params.moveId}` });
       }
 
       let state = game.initialState.toJSON();
@@ -224,13 +230,13 @@ export default (app) => {
             value: Joi.alternatives()
               .try(
                 Joi.string().valid("ace", "jack", "queen", "king"),
-                Joi.number().integer().min(2).max(10),
+                Joi.number().integer().min(2).max(10)
               )
               .required(),
           })
         )
         .required(),
-    })
+    });
 
     try {
       const data = await schema.validateAsync(req.body);
@@ -243,7 +249,10 @@ export default (app) => {
             .send({ error: `unknown game: ${req.params.gameID}` });
         }
 
-        if (req.session.user && game.owner.toString() !== req.session.user._id.toString()) {
+        if (
+          req.session.user &&
+          game.owner.toString() !== req.session.user._id.toString()
+        ) {
           return res.status(403).send({ error: "not game owner" });
         }
 
@@ -266,13 +275,15 @@ export default (app) => {
         const move = new app.models.Move({
           user: req.session.user._id,
           game: game._id,
-          cards: validationResult.movedCards ? validationResult.movedCards : data.cards,
+          cards: validationResult.movedCards
+            ? validationResult.movedCards
+            : data.cards,
           src: data.src,
           dst: data.dst,
           date: Date.now(),
         });
 
-        const {complete, victory} = isComplete(state);
+        const { complete, victory } = isComplete(state);
         if (complete) {
           game.active = false;
         }
@@ -292,6 +303,67 @@ export default (app) => {
       const message = err.details[0].message;
       console.log(`Game.move validation failure: ${message}`);
       res.status(400).send({ error: message });
+    }
+  });
+
+  /**
+   * Find all valid moves from piles to stacks
+   *
+   * @param {req.params.id} Id of game
+   * @return {200} Array of valid moves (empty array if none)
+   */
+  app.get("/v1/game/:id/valid-move", async (req, res) => {
+    try {
+      let game = await app.models.Game.findById(req.params.id);
+      if (!game) {
+        return res
+          .status(404)
+          .send({ error: `unknown game: ${req.params.id}` });
+      }
+
+      const state = game.state.toJSON();
+      const piles = [
+        "pile1",
+        "pile2",
+        "pile3",
+        "pile4",
+        "pile5",
+        "pile6",
+        "pile7",
+      ];
+      const stacks = ["stack1", "stack2", "stack3", "stack4"];
+      const validMoves = [];
+
+      for (const pile of piles) {
+        const pileCards = state[pile];
+        if (pileCards.length === 0) {
+          continue;
+        }
+
+        const topCard = pileCards[pileCards.length - 1];
+        console.log('topcard:', topCard);
+        if (!topCard.up) {
+          continue;
+        }
+
+        for (const stack of stacks) {
+          const move = {
+            cards: [{suit: topCard.suit, value: topCard.value}],
+            src: pile,
+            dst: stack,
+          };
+
+          const result = validateMove(state, move, game.drawCount);
+          if (result.valid) {
+            validMoves.push(move);
+          }
+        }
+      }
+
+      res.status(200).send(validMoves);
+    } catch (err) {
+      console.log(`Valid move search failure: ${err}`);
+      res.status(500).send({ error: "Internal server error" });
     }
   });
 
