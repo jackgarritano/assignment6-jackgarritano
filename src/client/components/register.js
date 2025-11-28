@@ -151,7 +151,7 @@ export const Register = () => {
         <FormButton
           type="button"
           onClick={() => {
-            window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23liWawHIrVg5l3YoB&redirect_uri=${encodeURIComponent("http://localhost:8080/github")}&scope=read:user`;
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=${process.env.CLIENT_ID}&scope=read:user`;
           }}
           style={{ background: "#24292e", color: "white" }}
         >
