@@ -85,6 +85,7 @@ export const FormButton = styled.button`
   border-radius: 5px;
   line-height: 2em;
   font-size: 0.8em;
+  cursor: pointer;
 `;
 
 export const FormSelect = styled.select`
