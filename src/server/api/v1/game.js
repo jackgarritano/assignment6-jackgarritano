@@ -258,7 +258,8 @@ export default (app) => {
 
         const validationResult = validateMove(game.state, data, game.drawCount);
         if (!validationResult.valid) {
-          return res.status(400).send({ error: validationResult.error });
+          // return 200 to avoid console error on frontend
+          return res.status(200).send({ error: validationResult.error });
         }
 
         game.state = validationResult.newState;

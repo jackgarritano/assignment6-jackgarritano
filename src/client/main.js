@@ -6,7 +6,7 @@ import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import styled from "styled-components";
 import { BrowserRouter, NavLink, Navigate, Route, Routes } from "react-router";
-
+import { Toaster } from "sonner";
 import { Header } from "./components/header.js";
 import { Landing } from "./components/landing.js";
 import { Login } from "./components/login.js";
@@ -109,6 +109,7 @@ const MyApp = () => {
 
   return (
     <BrowserRouter>
+      <Toaster />
       <GridBase>
         <Header user={state.username} email={state.primary_email} />
         <Routes>
@@ -122,7 +123,10 @@ const MyApp = () => {
             }
           />
           <Route path="/github" element={<GitHubCallback logIn={logIn} />} />
-          <Route path="/github-register" element={<GitHubRegister logIn={logIn} />} />
+          <Route
+            path="/github-register"
+            element={<GitHubRegister logIn={logIn} />}
+          />
           <Route
             path="/profile/:username"
             element={<Profile currentUser={state.username} />}
@@ -144,7 +148,10 @@ const MyApp = () => {
             }
           />
           <Route path="/game/:id" element={<Game user={state} />} />
-          <Route path="/game/:id/move/:moveId" element={<Game readOnly={true} />} />
+          <Route
+            path="/game/:id/move/:moveId"
+            element={<Game readOnly={true} />}
+          />
           <Route path="/results/:id" element={<Results user={state} />} />
         </Routes>
       </GridBase>

@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import styled from "styled-components";
 import { Pile } from "./pile.js";
+import { toast } from "sonner";
 
 const CardRow = styled.div`
   position: relative;
@@ -30,14 +31,16 @@ const AutoCompleteButton = styled.button`
   padding: 10px 20px;
   margin: 10px;
   font-size: 1em;
-  background: ${props => props.disabled ? '#cccccc' : (props.$active ? '#ff6b6b' : '#6495ed')};
+  background: ${(props) =>
+    props.disabled ? "#cccccc" : props.$active ? "#ff6b6b" : "#6495ed"};
   color: white;
   border: none;
   border-radius: 5px;
-  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 
   &:hover {
-    background: ${props => props.disabled ? '#cccccc' : (props.$active ? '#ff5252' : '#4169e1')};
+    background: ${(props) =>
+      props.disabled ? "#cccccc" : props.$active ? "#ff5252" : "#4169e1"};
   }
 `;
 
@@ -176,30 +179,32 @@ export const Game = ({ readOnly = false }) => {
       const data = await response.json();
 
       if (response.ok) {
-        setState({
-          pile1: data.pile1,
-          pile2: data.pile2,
-          pile3: data.pile3,
-          pile4: data.pile4,
-          pile5: data.pile5,
-          pile6: data.pile6,
-          pile7: data.pile7,
-          stack1: data.stack1,
-          stack2: data.stack2,
-          stack3: data.stack3,
-          stack4: data.stack4,
-          draw: data.draw,
-          discard: data.discard,
-        });
+        if (data.error != null) {
+          toast(`Invalid move: ${data.error}`);
+          setSelection({ pile: null, cardIndex: null, cards: [] });
+        } else {
+          setState({
+            pile1: data.pile1,
+            pile2: data.pile2,
+            pile3: data.pile3,
+            pile4: data.pile4,
+            pile5: data.pile5,
+            pile6: data.pile6,
+            pile7: data.pile7,
+            stack1: data.stack1,
+            stack2: data.stack2,
+            stack3: data.stack3,
+            stack4: data.stack4,
+            draw: data.draw,
+            discard: data.discard,
+          });
 
-        setSelection({ pile: null, cardIndex: null, cards: [] });
-        const validMovesResponse = await fetch(`/v1/game/${id}/valid-move`);
-        const validMoves = await validMovesResponse.json();
-        setHasValidMoves(validMoves.length > 0);
-      
+          setSelection({ pile: null, cardIndex: null, cards: [] });
+          const validMovesResponse = await fetch(`/v1/game/${id}/valid-move`);
+          const validMoves = await validMovesResponse.json();
+          setHasValidMoves(validMoves.length > 0);
+        }
       } else {
-        console.log(`Invalid move: ${data.error}`);
-
         setSelection({ pile: null, cardIndex: null, cards: [] });
       }
     } catch (error) {
@@ -260,8 +265,7 @@ export const Game = ({ readOnly = false }) => {
       handleSelection(pile, suit, value);
     } else if (selection.pile === pile && suit && value) {
       setSelection({ pile: null, cardIndex: null, cards: [] });
-    }
-    else if (selection.pile) {
+    } else if (selection.pile) {
       handleMove(pile);
     }
   };
@@ -271,13 +275,13 @@ export const Game = ({ readOnly = false }) => {
   return (
     <GameBase>
       {!readOnly && !moveId && (
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: "center" }}>
           <AutoCompleteButton
             onClick={toggleAutoComplete}
             disabled={!hasValidMoves}
             $active={autoCompleting}
           >
-            {autoCompleting ? 'Stop Auto-Complete' : 'Auto-Complete'}
+            {autoCompleting ? "Stop Auto-Complete" : "Auto-Complete"}
           </AutoCompleteButton>
         </div>
       )}
