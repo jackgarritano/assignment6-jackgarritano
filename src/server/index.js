@@ -24,6 +24,7 @@ const setupServer = async () => {
   // Get the app config
   const conf = await envConfig("./config/config.json", env);
   const port = process.env.PORT ? process.env.PORT : conf.port;
+  const connectionString = process.env.NODE_ENV === "production" ? process.env.MONGO_URI : conf.mongodb;
 
   // Setup our Express pipeline
   let app = express();
@@ -46,7 +47,7 @@ const setupServer = async () => {
 
   try {
     // Connect to MongoDB
-    await mongoose.connect(conf.mongodb);
+    await mongoose.connect(connectionString);
     mongoose.connection.on("disconnected", () => {
       console.log(`MongoDB shutting down`);
     });
