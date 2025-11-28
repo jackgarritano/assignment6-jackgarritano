@@ -10,6 +10,7 @@ import {
   FormLabel,
   FormInput,
   FormButton,
+  OrSeparator,
 } from "./shared.js";
 
 export const Login = (props) => {
@@ -70,6 +71,18 @@ export const Login = (props) => {
         <div />
         <FormButton id="submitBtn" onClick={onSubmit}>
           Login
+        </FormButton>
+        <FormLabel />
+        <OrSeparator />
+        <FormLabel />
+        <FormButton
+          type="button"
+          onClick={() => {
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23liWawHIrVg5l3YoB&redirect_uri=${encodeURIComponent("http://localhost:8080/github")}&scope=read:user`;
+          }}
+          style={{ background: "#24292e", color: "white" }}
+        >
+          Log in with GitHub
         </FormButton>
       </FormBase>
     </div>

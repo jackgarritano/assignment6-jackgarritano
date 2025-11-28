@@ -7,11 +7,13 @@ import url from "url";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
+const isProduction = process.env.NODE_ENV === 'production';   
+
 export default {
   context: path.join(__dirname, "/src/client"),
   entry: "./main.js",
-  mode: "development",
-  devtool: "eval-source-map",
+  mode: isProduction ? "production" : "development",
+  devtool: isProduction ? "source-map" : "eval-source-map",
   output: {
     filename: "[name].js",
     path: path.resolve(__dirname, "public/js")

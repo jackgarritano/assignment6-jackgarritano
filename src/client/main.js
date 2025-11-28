@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import styled from "styled-components";
-import { BrowserRouter, NavLink, Route, Routes } from "react-router";
+import { BrowserRouter, NavLink, Navigate, Route, Routes } from "react-router";
 
 import { Header } from "./components/header.js";
 import { Landing } from "./components/landing.js";
@@ -17,6 +17,8 @@ import { Edit } from "./components/edit.js";
 import { Start } from "./components/start.js";
 import { Results } from "./components/results.js";
 import { Game } from "./components/game.js";
+import { GitHubCallback } from "./components/github-callback.js";
+import { GitHubRegister } from "./components/github-register.js";
 
 const defaultUser = {
   username: "",
@@ -107,49 +109,49 @@ const MyApp = () => {
   };
 
   // Auto-login for development
-  useEffect(() => {
-    const autoLogin = async () => {
-      const isDev = true;
-      const autoLoginEnabled = true;
+  // useEffect(() => {
+  //   const autoLogin = async () => {
+  //     const isDev = true;
+  //     const autoLoginEnabled = true;
 
-      if (!isDev || !autoLoginEnabled) {
-        return;
-      }
+  //     if (!isDev || !autoLoginEnabled) {
+  //       return;
+  //     }
 
-      // Don't auto-login if user is already logged in
-      if (loggedIn()) {
-        return;
-      }
+  //     // Don't auto-login if user is already logged in
+  //     if (loggedIn()) {
+  //       return;
+  //     }
 
-      try {
-        console.log("Auto-logging in as test user (development mode)...");
+  //     try {
+  //       console.log("Auto-logging in as test user (development mode)...");
 
-        const response = await fetch("/v1/session", {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: "primaryuser",
-            password: "!12345abcdeF",
-          }),
-        });
+  //       const response = await fetch("/v1/session", {
+  //         method: "POST",
+  //         credentials: "include",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           username: "primaryuser",
+  //           password: "!12345abcdeF",
+  //         }),
+  //       });
 
-        if (response.ok) {
-          const data = await response.json();
-          await logIn(data.username);
-          console.log("Auto-login successful!");
-        } else {
-          console.warn("Auto-login failed - test user may not exist yet");
-        }
-      } catch (err) {
-        console.warn("Auto-login error:", err.message);
-      }
-    };
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         await logIn(data.username);
+  //         console.log("Auto-login successful!");
+  //       } else {
+  //         console.warn("Auto-login failed - test user may not exist yet");
+  //       }
+  //     } catch (err) {
+  //       console.warn("Auto-login error:", err.message);
+  //     }
+  //   };
 
-    autoLogin();
-  }, []);
+  //   autoLogin();
+  // }, []);
 
   return (
     <BrowserRouter>
@@ -165,6 +167,8 @@ const MyApp = () => {
               <CheckRegister loggedIn={loggedIn()} username={state.username} />
             }
           />
+          <Route path="/github" element={<GitHubCallback logIn={logIn} />} />
+          <Route path="/github-register" element={<GitHubRegister logIn={logIn} />} />
           <Route
             path="/profile/:username"
             element={<Profile currentUser={state.username} />}

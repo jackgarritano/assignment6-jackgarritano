@@ -68,6 +68,76 @@ export default (app) => {
   });
 
   /**
+   * Complete GitHub user registration
+   *
+   * @param {req.body.primary_email} Email address
+   * @param {req.body.first_name} First name
+   * @param {req.body.last_name} Last name
+   * @param {req.body.city} City
+   * @return {201, {username, primary_email}}
+   */
+  app.post("/v1/user/github", async (req, res) => {
+    if (!req.session.githubData) {
+      return res
+        .status(401)
+        .send({ error: "No GitHub authentication data found" });
+    }
+
+    const schema = Joi.object({
+      primary_email: Joi.string().email().required(),
+      first_name: Joi.string().allow(""),
+      last_name: Joi.string().allow(""),
+      city: Joi.string().allow(""),
+    });
+
+    try {
+      const data = await schema.validateAsync(req.body, { stripUnknown: true });
+      const { github_id, username } = req.session.githubData;
+
+      const user = new app.models.User({
+        username: username,
+        primary_email: data.primary_email,
+        first_name: data.first_name || "",
+        last_name: data.last_name || "",
+        city: data.city || "",
+        github_id: github_id,
+        auth_method: "github",
+      });
+
+      try {
+        await user.save();
+
+        delete req.session.githubData;
+
+        req.session.regenerate(() => {
+          req.session.user = user;
+          console.log(`GitHub user created: ${user.username}`);
+          res.status(201).send({
+            username: user.username,
+            primary_email: user.primary_email,
+          });
+        });
+      } catch (err) {
+        console.log(`User.createGitHub save error: ${err}`);
+        if (err.message.indexOf("username_1") !== -1) {
+          res.status(400).send({ error: "username already in use" });
+        } else if (err.message.indexOf("primary_email_1") !== -1) {
+          res.status(400).send({ error: "email address already in use" });
+        } else if (err.message.indexOf("github_id_1") !== -1) {
+          res.status(400).send({ error: "GitHub account already registered" });
+        } else {
+          console.log("Unknown error creating user:", err);
+          res.status(400).send({ error: "error creating user" });
+        }
+      }
+    } catch (err) {
+      const message = err.details[0].message;
+      console.log(`User.createGitHub validation failure: ${message}`);
+      res.status(400).send({ error: message });
+    }
+  });
+
+  /**
    * See if user exists
    *
    * @param {req.params.username} Username of the user to query for
@@ -100,7 +170,7 @@ export default (app) => {
     else {
       // Filter games data for only profile related info
       const filteredGames = user.games.map((game) =>
-        filterGameForProfile(game),
+        filterGameForProfile(game)
       );
       res.status(200).send({
         username: user.username,
@@ -140,12 +210,12 @@ export default (app) => {
         req.session.user = await app.models.User.findOneAndUpdate(
           query,
           { $set: data },
-          { new: true },
+          { new: true }
         );
         res.status(204).end();
       } catch (err) {
         console.log(
-          `User.update logged-in user not found: ${req.session.user.id}`,
+          `User.update logged-in user not found: ${req.session.user.id}`
         );
         res.status(500).end();
       }

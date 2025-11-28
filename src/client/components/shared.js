@@ -123,3 +123,28 @@ export const ShortP = styled.p`
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
+
+const OrSeparatorBase = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+`;
+
+const OrSeparatorLine = styled.hr`
+  flex: 1;
+  border: none;
+  border-top: 1px solid #ccc;
+`;
+
+const OrSeparatorText = styled.span`
+  color: #666;
+`;
+
+export const OrSeparator = () => (
+  <OrSeparatorBase>
+    <OrSeparatorLine />
+    <OrSeparatorText>OR</OrSeparatorText>
+    <OrSeparatorLine />
+  </OrSeparatorBase>
+);

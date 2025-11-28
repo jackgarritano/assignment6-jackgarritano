@@ -21,8 +21,10 @@ const User = new Schema({
   first_name: { type: String, default: "" },
   last_name: { type: String, default: "" },
   city: { type: String, default: "" },
-  hash: { type: String, required: true },
-  salt: { type: String, required: true },
+  hash: { type: String },
+  salt: { type: String },
+  github_id: { type: String, sparse: true, unique: true },
+  auth_method: { type: String, enum: ['local', 'github'], default: 'local' },
   games: [{ type: Schema.Types.ObjectId, ref: "Game" }],
 });
 
@@ -48,6 +50,13 @@ User.method("authenticate", function (plainText) {
 });
 
 User.pre("save", function (next) {
+  if (this.auth_method === 'local' && (!this.hash || !this.salt)) {
+    return next(new Error('Hash and salt are required for local authentication'));
+  }
+  if (this.auth_method === 'github' && !this.github_id) {
+    return next(new Error('GitHub ID is required for GitHub authentication'));
+  }
+
   // Sanitize strings
   this.username = this.username.toLowerCase();
   this.primary_email = this.primary_email.toLowerCase();

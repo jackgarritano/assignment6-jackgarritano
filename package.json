@@ -21,7 +21,8 @@
   },
   "scripts": {
     "build": "webpack",
-    "start": "node --watch ./src/server/index.js",
+    "build:prod": "cross-env NODE_ENV=production webpack",
+    "start": "node --env-file=./src/server/.env --watch ./src/server/index.js",
     "start-test": "cross-env NODE_ENV=test node ./src/server/index.js",
     "test": "cross-env NODE_ENV=test node --test --test-concurrency=1"
   },

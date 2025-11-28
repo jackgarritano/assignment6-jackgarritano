@@ -65,4 +65,80 @@ export default (app) => {
       res.status(200).end();
     }
   });
+
+  /**
+   * GitHub OAuth callback
+   *
+   * @param {req.query.code} OAuth authorization code from GitHub
+   * @return {200, {exists: boolean, username: string}} - exists=true if user logged in, false if needs registration
+   */
+  app.get("/v1/session/github-login", async (req, res) => {
+    const { code } = req.query;
+
+    if (!code) {
+      return res.status(400).send({ error: "Authorization code is required" });
+    }
+
+    try {
+      const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: process.env.GITHUB_CLIENT_ID,
+          client_secret: process.env.GITHUB_CLIENT_SECRET,
+          code: code,
+        }),
+      });
+
+      const tokenData = await tokenResponse.json();
+
+      if (tokenData.error) {
+        console.log(`GitHub OAuth error: ${tokenData.error}`);
+        console.log(tokenData);
+        return res.status(400).send({ error: "GitHub authorization failed" });
+      }
+
+      const accessToken = tokenData.access_token;
+
+      const userResponse = await fetch("https://api.github.com/user", {
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Accept": "application/json",
+        },
+      });
+
+      const githubUser = await userResponse.json();
+
+      let user = await app.models.User.findOne({ github_id: githubUser.id.toString() });
+
+      if (user) {
+        // log in existing user
+        req.session.regenerate(() => {
+          req.session.user = user;
+          console.log(`GitHub login success: ${user.username}`);
+          res.status(200).send({
+            exists: true,
+            username: user.username,
+          });
+        });
+      } else {
+        // store GitHub data in session for registration of new user
+        req.session.githubData = {
+          github_id: githubUser.id.toString(),
+          username: githubUser.login,
+        };
+        console.log(`GitHub new user: ${githubUser.login}`);
+        res.status(200).send({
+          exists: false,
+          username: githubUser.login,
+        });
+      }
+    } catch (err) {
+      console.log(`GitHub OAuth error chekc: ${err}`);
+      res.status(500).send({ error: "Internal server error" });
+    }
+  });
 };

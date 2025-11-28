@@ -11,6 +11,7 @@ import {
   FormLabel,
   FormButton,
   ModalNotify,
+  OrSeparator,
 } from "./shared.js";
 import { validPassword, validUsername } from "../../shared/index.js";
 
@@ -143,6 +144,18 @@ export const Register = () => {
         <div />
         <FormButton id="submitBtn" onClick={onSubmit}>
           Register
+        </FormButton>
+        <FormLabel />
+        <OrSeparator />
+        <FormLabel />
+        <FormButton
+          type="button"
+          onClick={() => {
+            window.location.href = `https://github.com/login/oauth/authorize?client_id=Ov23liWawHIrVg5l3YoB&redirect_uri=${encodeURIComponent("http://localhost:8080/github")}&scope=read:user`;
+          }}
+          style={{ background: "#24292e", color: "white" }}
+        >
+          Register with GitHub
         </FormButton>
       </FormBase>
     </div>
