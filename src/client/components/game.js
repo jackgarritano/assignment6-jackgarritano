@@ -121,7 +121,6 @@ export const Game = ({ readOnly = false }) => {
           await makeMove(move);
         }
       } catch (error) {
-        console.error("Error fetching valid moves:", error);
         setAutoCompleting(false);
       }
     };
@@ -164,8 +163,6 @@ export const Game = ({ readOnly = false }) => {
   };
 
   const makeMove = async (moveRequest) => {
-    console.log("Move request:", JSON.stringify(moveRequest, null, 2));
-
     try {
       const response = await fetch(`/v1/game/${id}`, {
         body: JSON.stringify(moveRequest),
@@ -232,7 +229,6 @@ export const Game = ({ readOnly = false }) => {
 
   const onClick = (ev) => {
     let target = ev.target;
-    console.log("target:", target);
 
     // Name is stored on parent for empty piles
     let pile = target.dataset.pile;

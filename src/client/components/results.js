@@ -111,7 +111,6 @@ export const Results = () => {
         setGame(data);
       })
       .catch((err) => {
-        console.log(err);
         setError(err);
       });
   }, [id]);

@@ -85,7 +85,6 @@ const MyApp = () => {
   // If the user has logged in, grab info from sessionStorage
   const data = localStorage.getItem("user");
   let [state, setState] = useState(data ? JSON.parse(data) : defaultUser);
-  console.log(`Starting as user: ${state.username}`);
 
   // Helper to check if the user is logged in or not
   const loggedIn = () => {
@@ -107,51 +106,6 @@ const MyApp = () => {
     // Reset user state
     setState(defaultUser);
   };
-
-  // Auto-login for development
-  // useEffect(() => {
-  //   const autoLogin = async () => {
-  //     const isDev = true;
-  //     const autoLoginEnabled = true;
-
-  //     if (!isDev || !autoLoginEnabled) {
-  //       return;
-  //     }
-
-  //     // Don't auto-login if user is already logged in
-  //     if (loggedIn()) {
-  //       return;
-  //     }
-
-  //     try {
-  //       console.log("Auto-logging in as test user (development mode)...");
-
-  //       const response = await fetch("/v1/session", {
-  //         method: "POST",
-  //         credentials: "include",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           username: "primaryuser",
-  //           password: "!12345abcdeF",
-  //         }),
-  //       });
-
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         await logIn(data.username);
-  //         console.log("Auto-login successful!");
-  //       } else {
-  //         console.warn("Auto-login failed - test user may not exist yet");
-  //       }
-  //     } catch (err) {
-  //       console.warn("Auto-login error:", err.message);
-  //     }
-  //   };
-
-  //   autoLogin();
-  // }, []);
 
   return (
     <BrowserRouter>

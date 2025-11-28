@@ -104,7 +104,7 @@ export const Profile = (props) => {
       .then((data) => {
         setState(data);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
   };
 
   useEffect(() => {
