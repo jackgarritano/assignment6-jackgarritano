@@ -13,10 +13,6 @@ import {
 } from "../../solitare.js";
 
 export default (app) => {
-  app.get("/v1/crash", async (req, res) => {
-    process.exit(1);
-  });
-
   /**
    * Create a new game
    *
