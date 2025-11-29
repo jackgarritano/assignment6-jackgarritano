@@ -1,5 +1,5 @@
 /* Copyright G. Hemingway, @2025 - All rights reserved */
-/* Attribution: Assignment 5 codebase */
+/* Attribution: Assignment 5 codebase, webpack docs */
 "use strict";
 
 import path from "node:path";

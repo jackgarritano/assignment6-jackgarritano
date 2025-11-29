@@ -1,5 +1,5 @@
 /* Copyright G. Hemingway, @2025 - All rights reserved */
-/* Attribution: Assignment 5 codebase */
+/* Attribution: Assignment 5 codebase, github docs */
 "use strict";
 
 import React, { useState, useEffect } from "react";
