@@ -6,6 +6,7 @@
   "type": "module",
   "dependencies": {
     "body-parser": "^2.2.0",
+    "connect-mongo": "^5.1.0",
     "express": "^5.1.0",
     "express-session": "^1.17.1",
     "joi": "^18.0.1",

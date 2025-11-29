@@ -8,6 +8,7 @@ import bodyParser from "body-parser";
 import logger from "morgan";
 import session from "express-session";
 import mongoose from "mongoose";
+import MongoStore from 'connect-mongo'
 import Pug from "pug";
 import envConfig from "simple-env-config";
 
@@ -33,6 +34,7 @@ const setupServer = async () => {
   // Setup pipeline session support
   app.store = session({
     name: "session",
+    store: MongoStore.create({ mongoUrl: connectionString }),
     secret: "grahamcardrules",
     resave: false,
     saveUninitialized: false,
