@@ -9,6 +9,7 @@ import styled from "styled-components";
 const Game = ({ game }) => {
   const date = new Date(game.start);
   const url = `/${game.active ? "game" : "results"}/${game.id}`;
+  const resultsUrl = `/results/${game.id}`;
   return (
     <tr>
       <td>
@@ -18,6 +19,7 @@ const Game = ({ game }) => {
       <td>{game.moves}</td>
       <td>{game.score}</td>
       <td>{game.game}</td>
+      <td><NavLink to={resultsUrl}>Results</NavLink></td>
     </tr>
   );
 };
@@ -75,6 +77,7 @@ export const GameList = ({ games, toCreateGame }) => {
             <th># of Moves</th>
             <th>Score</th>
             <th>Game Type</th>
+            <th>Results</th>
           </tr>
         </thead>
         <tbody>{gameList}</tbody>
